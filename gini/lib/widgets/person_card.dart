@@ -233,6 +233,21 @@ class PersonCard extends StatelessWidget {
                                         height: 8.0,
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${heightValue}',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: isFavorite
+                                            ? (isDarkMode
+                                                ? Colors.white70
+                                                : Colors.black87)
+                                            : theme
+                                                .colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],

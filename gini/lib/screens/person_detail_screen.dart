@@ -28,18 +28,17 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
   final SwapiService _swapiService = SwapiService();
 
   // Data to be loaded
+  Person? _person;
+  List<Film> _films = [];
+  List<Species> _species = [];
+  List<Vehicle> _vehicles = [];
+  List<Starship> _starships = [];
   Planet? _homeworld;
-  final List<Film> _films = [];
-  final List<Species> _species = [];
-  final List<Vehicle> _vehicles = [];
-  final List<Starship> _starships = [];
 
   // Loading states
-  bool _loadingHomeworld = false;
-  bool _loadingFilms = false;
-  bool _loadingSpecies = false;
-  bool _loadingVehicles = false;
-  bool _loadingStarships = false;
+  bool _isLoading = true;
+  bool _hasError = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -67,20 +66,20 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
         widget.person.homeworld == 'unknown') {
       return;
     }
-    setState(() => _loadingHomeworld = true);
+    setState(() => _isLoading = true);
     try {
       _homeworld =
           await _swapiService.fetchPlanetByUrl(widget.person.homeworld);
     } catch (e) {
       print('Error loading homeworld: $e');
     } finally {
-      if (mounted) setState(() => _loadingHomeworld = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _loadFilms() async {
     if (widget.person.films.isEmpty) return;
-    setState(() => _loadingFilms = true);
+    setState(() => _isLoading = true);
     try {
       for (final url in widget.person.films) {
         final film = await _swapiService.fetchFilmByUrl(url);
@@ -91,13 +90,13 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
     } catch (e) {
       print('Error loading films: $e');
     } finally {
-      if (mounted) setState(() => _loadingFilms = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _loadSpecies() async {
     if (widget.person.species.isEmpty) return;
-    setState(() => _loadingSpecies = true);
+    setState(() => _isLoading = true);
     try {
       for (final url in widget.person.species) {
         final species = await _swapiService.fetchSpeciesByUrl(url);
@@ -108,13 +107,13 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
     } catch (e) {
       print('Error loading species: $e');
     } finally {
-      if (mounted) setState(() => _loadingSpecies = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _loadVehicles() async {
     if (widget.person.vehicles.isEmpty) return;
-    setState(() => _loadingVehicles = true);
+    setState(() => _isLoading = true);
     try {
       for (final url in widget.person.vehicles) {
         final vehicle = await _swapiService.fetchVehicleByUrl(url);
@@ -125,13 +124,13 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
     } catch (e) {
       print('Error loading vehicles: $e');
     } finally {
-      if (mounted) setState(() => _loadingVehicles = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _loadStarships() async {
     if (widget.person.starships.isEmpty) return;
-    setState(() => _loadingStarships = true);
+    setState(() => _isLoading = true);
     try {
       for (final url in widget.person.starships) {
         final starship = await _swapiService.fetchStarshipByUrl(url);
@@ -142,7 +141,7 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
     } catch (e) {
       print('Error loading starships: $e');
     } finally {
-      if (mounted) setState(() => _loadingStarships = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -190,7 +189,7 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
             ],
           ),
 
-          // Informations principales du personnage
+          // Character's main information
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Card(
@@ -284,7 +283,7 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
   }
 
   Widget _buildFilmsTab() {
-    if (_loadingFilms && _films.isEmpty) {
+    if (_isLoading && _films.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -292,44 +291,11 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
       return const Center(child: Text('No films available'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _films.length,
-      itemBuilder: (context, index) {
-        final film = _films[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          elevation: 2,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ExpansionTile(
-            title: Text(
-              film.title,
-              style:
-                  AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text('Episode ${film.episodeId} • ${film.releaseDate}'),
-            expandedCrossAxisAlignment: CrossAxisAlignment.start,
-            childrenPadding: const EdgeInsets.all(16),
-            children: [
-              Text(
-                film.openingCrawl.replaceAll(r'\r\n', '\n'),
-                style: AppTextStyles.bodyMedium
-                    .copyWith(fontStyle: FontStyle.italic),
-              ),
-              const SizedBox(height: 16),
-              _buildInfoRow('Director', film.director),
-              _buildInfoRow('Producer', film.producer),
-              _buildInfoRow('Release date', film.releaseDate),
-            ],
-          ),
-        );
-      },
-    );
+    return _buildList(_films.map((film) => film.title).toList());
   }
 
   Widget _buildSpeciesTab() {
-    if (_loadingSpecies && _species.isEmpty) {
+    if (_isLoading && _species.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -337,47 +303,11 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
       return const Center(child: Text('No species available'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _species.length,
-      itemBuilder: (context, index) {
-        final species = _species[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          elevation: 2,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  species.name,
-                  style: AppTextStyles.titleLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Divider(),
-                _buildInfoRow('Classification', species.classification),
-                _buildInfoRow('Designation', species.designation),
-                _buildInfoRow('Average height', '${species.averageHeight} cm'),
-                _buildInfoRow('Skin colors', species.skinColors),
-                _buildInfoRow('Hair colors', species.hairColors),
-                _buildInfoRow('Eye colors', species.eyeColors),
-                _buildInfoRow(
-                    'Average lifespan', '${species.averageLifespan} years'),
-                _buildInfoRow('Language', species.language),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    return _buildList(_species.map((species) => species.name).toList());
   }
 
   Widget _buildVehiclesTab() {
-    if (_loadingVehicles && _vehicles.isEmpty) {
+    if (_isLoading && _vehicles.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -385,53 +315,11 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
       return const Center(child: Text('No vehicles available'));
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _vehicles.length,
-      itemBuilder: (context, index) {
-        final vehicle = _vehicles[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          elevation: 2,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  vehicle.name,
-                  style: AppTextStyles.titleLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  vehicle.model,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const Divider(),
-                _buildInfoRow('Manufacturer', vehicle.manufacturer),
-                _buildInfoRow('Cost', '${vehicle.costInCredits} credits'),
-                _buildInfoRow('Length', '${vehicle.length} m'),
-                _buildInfoRow('Max speed', vehicle.maxAtmospheringSpeed),
-                _buildInfoRow('Crew', vehicle.crew),
-                _buildInfoRow('Passengers', vehicle.passengers),
-                _buildInfoRow('Cargo capacity', vehicle.cargoCapacity),
-                _buildInfoRow('Consumables', vehicle.consumables),
-                _buildInfoRow('Class', vehicle.vehicleClass),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    return _buildList(_vehicles.map((vehicle) => vehicle.name).toList());
   }
 
   Widget _buildStarshipsTab() {
-    if (_loadingStarships && _starships.isEmpty) {
+    if (_isLoading && _starships.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
@@ -439,11 +327,27 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
       return const Center(child: Text('No starships available'));
     }
 
+    return _buildList(_starships.map((starship) => starship.name).toList());
+  }
+
+  Widget _buildHomeworldTab() {
+    if (_isLoading && _homeworld == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_homeworld == null) {
+      return const Center(child: Text('Planet information not available'));
+    }
+
+    return _buildList([_homeworld?.name ?? 'Unknown']);
+  }
+
+  Widget _buildList(List<String> items) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _starships.length,
+      itemCount: items.length,
       itemBuilder: (context, index) {
-        final starship = _starships[index];
+        final item = items[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           elevation: 2,
@@ -455,151 +359,16 @@ class _PersonDetailScreenState extends State<PersonDetailScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  starship.name,
+                  item,
                   style: AppTextStyles.titleLarge.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  starship.model,
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                ),
-                const Divider(),
-                _buildInfoRow('Manufacturer', starship.manufacturer),
-                _buildInfoRow('Cost', '${starship.costInCredits} credits'),
-                _buildInfoRow('Length', '${starship.length} m'),
-                _buildInfoRow('Max speed', starship.maxAtmospheringSpeed),
-                _buildInfoRow('Crew', starship.crew),
-                _buildInfoRow('Passengers', starship.passengers),
-                _buildInfoRow('Cargo capacity', starship.cargoCapacity),
-                _buildInfoRow('Consumables', starship.consumables),
-                _buildInfoRow('Hyperdrive', starship.hyperdriveRating),
-                _buildInfoRow('MGLT', starship.mglt),
-                _buildInfoRow('Class', starship.starshipClass),
               ],
             ),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildHomeworldTab() {
-    if (_loadingHomeworld && _homeworld == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_homeworld == null) {
-      return const Center(child: Text('Planet information not available'));
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _homeworld!.name,
-                style: AppTextStyles.headlineSmall.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Divider(),
-              _buildInfoRow(
-                  'Rotation period', '${_homeworld!.rotationPeriod} hours'),
-              _buildInfoRow(
-                  'Orbital period', '${_homeworld!.orbitalPeriod} days'),
-              _buildInfoRow('Diameter', '${_homeworld!.diameter} km'),
-              _buildInfoRow('Climate', _homeworld!.climate),
-              _buildInfoRow('Gravity', _homeworld!.gravity),
-              _buildInfoRow('Terrain', _homeworld!.terrain),
-              _buildInfoRow('Surface water', '${_homeworld!.surfaceWater}%'),
-              _buildInfoRow('Population', _homeworld!.population),
-              const SizedBox(height: 12),
-              Text(
-                'Films featuring this planet',
-                style: AppTextStyles.titleMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _homeworld!.films.isEmpty
-                  ? const Text('No known films')
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _homeworld!.films
-                          .map((url) => FutureBuilder<Film?>(
-                                future: _swapiService.fetchFilmByUrl(url),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 4.0),
-                                      child: LinearProgressIndicator(),
-                                    );
-                                  }
-                                  if (!snapshot.hasData ||
-                                      snapshot.data == null) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 4.0),
-                                    child: Text('• ${snapshot.data!.title}'),
-                                  );
-                                },
-                              ))
-                          .toList(),
-                    ),
-              const SizedBox(height: 12),
-              Text(
-                'Known residents',
-                style: AppTextStyles.titleMedium.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _homeworld!.residents.isEmpty
-                  ? const Text('No known residents')
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _homeworld!.residents
-                          .map((url) => FutureBuilder<Person?>(
-                                future: _swapiService.fetchPersonByUrl(url),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 4.0),
-                                      child: LinearProgressIndicator(),
-                                    );
-                                  }
-                                  if (!snapshot.hasData ||
-                                      snapshot.data == null) {
-                                    return const SizedBox.shrink();
-                                  }
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 4.0),
-                                    child: Text('• ${snapshot.data!.name}'),
-                                  );
-                                },
-                              ))
-                          .toList(),
-                    ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

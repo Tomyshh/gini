@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Scroll controller à utiliser comme controller primaire
+  // Primary scroll controller to use
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
 
@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Image logo
+                          // Logo image
                           Padding(
                             padding: const EdgeInsets.only(top: kToolbarHeight),
                             child: Image.asset(
@@ -258,12 +258,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: backgroundColor,
                 child: Stack(
                   children: [
-                    // Star Wars Logo en mode paysage
+                    // Star Wars Logo in landscape mode
                     Positioned.fill(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Logo à gauche
+                          // Logo on the left
                           Expanded(
                             flex: 3,
                             child: Padding(
@@ -275,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          // Characters à droite
+                          // Characters on the right
                           Expanded(
                             flex: 2,
                             child: Padding(
@@ -401,8 +401,8 @@ class StarWarsBackgroundPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     // Large stars
-    for (int i = 0; i < 40; i++) {
-      final x = i * (size.width / 40);
+    for (int i = 0; i < 50; i++) {
+      final x = i * (size.width / 50);
       final y = (i % 3) * 20.0 + (i / 3) * 15.0;
       final radius = (i % 4) * 1.0 + 1.0;
 
@@ -420,7 +420,7 @@ class StarWarsBackgroundPainter extends CustomPainter {
 
     // Horizontal lines
     paint.strokeWidth = 0.5;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 20; i++) {
       final y = (size.height / 12) * i;
 
       canvas.drawLine(
@@ -435,7 +435,7 @@ class StarWarsBackgroundPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Délégué pour le SliverPersistentHeader en mode paysage
+// Delegate for SliverPersistentHeader in landscape mode
 class _SimpleSliverDelegate extends SliverPersistentHeaderDelegate {
   final double height;
   final Widget Function(

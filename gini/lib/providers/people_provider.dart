@@ -34,7 +34,7 @@ class PeopleProvider with ChangeNotifier {
   Person? get favoritePerson => _favoritePerson;
   int get currentPage => _currentPage;
 
-  // Initialiser le provider en chargeant la première page
+  // Initialize provider by loading the first page
   Future<void> initialize() async {
     if (_people.isEmpty && !_isLoading) {
       await _loadFavoriteFromPrefs();
@@ -42,7 +42,7 @@ class PeopleProvider with ChangeNotifier {
     }
   }
 
-  // Charger le favori depuis SharedPreferences
+  // Load favorite from SharedPreferences
   Future<void> _loadFavoriteFromPrefs() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -50,7 +50,7 @@ class PeopleProvider with ChangeNotifier {
 
       if (favoriteUrl != null && favoriteUrl.isNotEmpty) {
         print("Loading favorite from prefs: $favoriteUrl");
-        // On va chercher le détail du personnage via son URL
+        // Get character details via URL
         final person = await _swapiService.fetchPersonByUrl(favoriteUrl);
         if (person != null) {
           person.isFavorite = true;
@@ -63,7 +63,7 @@ class PeopleProvider with ChangeNotifier {
     }
   }
 
-  // Sauvegarder le favori dans SharedPreferences
+  // Save favorite to SharedPreferences
   Future<void> _saveFavoriteToPrefs(Person? person) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -232,7 +232,7 @@ class PeopleProvider with ChangeNotifier {
   Future<void> setFavoritePerson(Person person) async {
     print("Setting ${person.name} as favorite");
 
-    // Si c'est déjà le favori, on l'enlève
+    // If it's already the favorite, remove it
     if (_favoritePerson != null && _favoritePerson!.url == person.url) {
       final index = _people.indexWhere((p) => p.url == _favoritePerson!.url);
       if (index != -1) {
