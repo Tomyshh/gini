@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               automaticallyImplyLeading: false,
               elevation: 0,
               backgroundColor: backgroundColor,
-              toolbarHeight: 100,
+              toolbarHeight: 110,
               surfaceTintColor: AppTheme.darkSide,
               flexibleSpace: Container(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -166,9 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      height: 50,
+                      height: 60,
                       margin: EdgeInsets.only(
-                        bottom: 8,
+                        bottom: 10,
                         top: kToolbarHeight,
                       ),
                       child: const SearchBarWidget(),
