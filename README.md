@@ -1,57 +1,57 @@
 # Gini - Star Wars Characters App
 
-Gini est une application Flutter moderne qui permet de rechercher, explorer et visualiser les personnages de l'univers Star Wars grâce à l'API SWAPI. L'interface est immersive, inspirée de l'univers Star Wars, et propose une expérience utilisateur fluide et élégante.
+Gini is a modern Flutter application that lets you search, explore, and view characters from the Star Wars universe using the SWAPI API. The interface is immersive, inspired by Star Wars, and offers a smooth and elegant user experience.
 
-## Fonctionnalités principales
+## Main Features
 
-- **Recherche instantanée** : Barre de recherche optimisée avec suggestions dynamiques dès 3 caractères.
-- **Affichage des personnages** : Liste détaillée avec nom, taille, genre, date de naissance, favoris, etc.
-- **Effets visuels Star Wars** : Thème sombre, couleurs dynamiques, logo animé, et éléments graphiques immersifs.
-- **Responsive** : Adaptation automatique en mode portrait et paysage.
-- **Chargement infini** : Pagination automatique lors du scroll pour charger plus de personnages.
-- **Gestion des erreurs** : Affichage d'un message d'erreur et possibilité de recharger en cas de problème réseau.
-- **Favoris** : Possibilité de marquer des personnages comme favoris (à implémenter/étendre selon besoin).
+- **Instant Search**: Optimized search bar with dynamic suggestions from 3 characters.
+- **Character Display**: Detailed list with name, height, gender, birth year, favorites, and more.
+- **Star Wars Visual Effects**: Dark theme, dynamic colors, animated logo, and immersive graphical elements.
+- **Responsive**: Automatically adapts to portrait and landscape modes.
+- **Infinite Scrolling**: Automatic pagination when scrolling to load more characters.
+- **Error Handling**: Displays an error message and allows retrying in case of network issues.
+- **Favorites**: Ability to mark characters as favorites (can be extended as needed).
 
-## Aperçu
+## Preview
 
-![Aperçu de l'application](assets/images/logo_yellow.png)
+![App Preview](assets/images/logo_yellow.png)
 
 ## Installation
 
-1. **Cloner le dépôt**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/Tomyshh/gini.git
    cd gini
    ```
-2. **Installer les dépendances**
+2. **Install dependencies**
    ```bash
    flutter pub get
    ```
-3. **Lancer l'application**
+3. **Run the app**
    ```bash
    flutter run
    ```
 
 ## Configuration
-- **Police personnalisée** : La police "News Gothic Extra Condensed Regular" est incluse dans `assets/fonts` et utilisée pour le logo.
-- **Images** : Le logo principal se trouve dans `assets/images/logo_yellow.png`.
-- **API** : Les données proviennent de [SWAPI](https://swapi.dev/).
+- **Custom Font**: The font "News Gothic Extra Condensed Regular" is included in `assets/fonts` and used for the logo.
+- **Images**: The main logo is located at `assets/images/logo_yellow.png`.
+- **API**: Data comes from [SWAPI](https://swapi.dev/).
 
-## Technologies utilisées
+## Technologies Used
 - **Flutter** (Dart)
-- **Provider** (gestion d'état)
-- **SWAPI** (API Star Wars)
-- **Animations** : flutter_animate
-- **UI/UX** : Design responsive, thème sombre, effets visuels Star Wars
+- **Provider** (state management)
+- **SWAPI** (Star Wars API)
+- **Animations**: flutter_animate
+- **UI/UX**: Responsive design, dark theme, Star Wars visual effects
 
-## Structure du projet
-- `lib/screens/` : Écrans principaux (home, etc.)
-- `lib/widgets/` : Composants réutilisables (search bar, people list, etc.)
-- `lib/providers/` : Gestionnaires d'état (PeopleProvider)
-- `assets/` : Images, polices, etc.
+## Project Structure
+- `lib/screens/`: Main screens (home, etc.)
+- `lib/widgets/`: Reusable components (search bar, people list, etc.)
+- `lib/providers/`: State managers (PeopleProvider)
+- `assets/`: Images, fonts, etc.
 
-## Auteur
+## Author
 - [Tomyshh](https://github.com/Tomyshh)
 
-## Licence
-Ce projet est open-source sous licence MIT. 
+## License
+This project is open-source under the MIT license. 
