@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'text_styles.dart';
 
 class AppTheme {
   // Star Wars Colors
@@ -40,7 +40,23 @@ class AppTheme {
 
     return baseTheme.copyWith(
       colorScheme: colorScheme,
-      textTheme: GoogleFonts.interTextTheme(baseTheme.textTheme),
+      textTheme: TextTheme(
+        displayLarge: AppTextStyles.headlineLarge,
+        displayMedium: AppTextStyles.headlineMedium,
+        displaySmall: AppTextStyles.headlineSmall,
+        headlineLarge: AppTextStyles.titleLarge,
+        headlineMedium: AppTextStyles.titleMedium,
+        headlineSmall: AppTextStyles.titleSmall,
+        titleLarge: AppTextStyles.titleLarge,
+        titleMedium: AppTextStyles.titleMedium,
+        titleSmall: AppTextStyles.titleSmall,
+        bodyLarge: AppTextStyles.bodyLarge,
+        bodyMedium: AppTextStyles.bodyMedium,
+        bodySmall: AppTextStyles.bodySmall,
+        labelLarge: AppTextStyles.button,
+        labelMedium: AppTextStyles.button,
+        labelSmall: AppTextStyles.caption,
+      ),
       appBarTheme: const AppBarTheme(
         elevation: 0,
         color: Colors.transparent,
@@ -54,6 +70,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 3,
+          textStyle: AppTextStyles.button,
         ),
       ),
       cardTheme: CardTheme(
@@ -86,6 +103,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
+        labelStyle: AppTextStyles.bodyMedium,
+        hintStyle: AppTextStyles.bodyMedium.copyWith(color: Colors.grey),
       ),
     );
   }
@@ -118,7 +137,23 @@ class AppTheme {
 
     return baseTheme.copyWith(
       colorScheme: colorScheme,
-      textTheme: GoogleFonts.interTextTheme(baseTheme.textTheme),
+      textTheme: TextTheme(
+        displayLarge: AppTextStyles.headlineLarge,
+        displayMedium: AppTextStyles.headlineMedium,
+        displaySmall: AppTextStyles.headlineSmall,
+        headlineLarge: AppTextStyles.titleLarge,
+        headlineMedium: AppTextStyles.titleMedium,
+        headlineSmall: AppTextStyles.titleSmall,
+        titleLarge: AppTextStyles.titleLarge,
+        titleMedium: AppTextStyles.titleMedium,
+        titleSmall: AppTextStyles.titleSmall,
+        bodyLarge: AppTextStyles.bodyLarge,
+        bodyMedium: AppTextStyles.bodyMedium,
+        bodySmall: AppTextStyles.bodySmall,
+        labelLarge: AppTextStyles.button,
+        labelMedium: AppTextStyles.button,
+        labelSmall: AppTextStyles.caption,
+      ),
       appBarTheme: const AppBarTheme(
         elevation: 0,
         color: Colors.transparent,
@@ -133,6 +168,7 @@ class AppTheme {
           ),
           elevation: 4,
           shadowColor: colorScheme.primary.withOpacity(0.5),
+          textStyle: AppTextStyles.button,
         ),
       ),
       cardTheme: CardTheme(
@@ -165,6 +201,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
+        labelStyle: AppTextStyles.bodyMedium,
+        hintStyle: AppTextStyles.bodyMedium.copyWith(color: Colors.grey),
       ),
     );
   }

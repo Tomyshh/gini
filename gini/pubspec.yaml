@@ -35,3 +35,10 @@ flutter:
       fonts:
         - asset: assets/fonts/News Gothic Extra Condensed Regular.otf
           weight: 400
+    - family: Faustina
+      fonts:
+        - asset: assets/fonts/Faustina-VariableFont_wght.ttf
+          weight: 400
+        - asset: assets/fonts/Faustina-Italic-VariableFont_wght.ttf
+          weight: 400
+          style: italic

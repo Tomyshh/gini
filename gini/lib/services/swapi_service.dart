@@ -1,21 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/person.dart';
+import '../models/film.dart';
+import '../models/species.dart';
+import '../models/vehicle.dart';
+import '../models/starship.dart';
+import '../models/planet.dart';
 
 class SwapiService {
   static const String baseUrl = 'https://swapi.py4e.com/api';
 
-  // Ajout d'un timeout pour les requêtes
+  // Added timeout for requests
   final Duration _timeout = const Duration(seconds: 15);
 
-  /// Récupère les personnages par page
+  /// Fetches characters by page
   Future<Map<String, dynamic>> fetchPeopleByPage(int page) async {
     try {
-      // Afficher clairement l'URL pour le débogage
+      // Display URL clearly for debugging
       final String url = '$baseUrl/people/?page=$page';
       print('Fetching data from: $url');
 
-      // Ajouter un timeout à la requête
+      // Add timeout to the request
       final response =
           await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
         throw Exception('Request timed out. Please check your connection.');
@@ -24,12 +29,12 @@ class SwapiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
 
-        // Vérifier si les résultats existent et sont non vides
+        // Check if results exist and are not empty
         if (!data.containsKey('results') || data['results'] == null) {
           throw Exception('Invalid response format: missing results');
         }
 
-        // Convertir les résultats en objets Person
+        // Convert results to Person objects
         final List<dynamic> results = data['results'];
         final List<Person> people =
             results.map((personData) => Person.fromJson(personData)).toList();
@@ -51,15 +56,15 @@ class SwapiService {
     }
   }
 
-  /// Recherche des personnages par nom
+  /// Search characters by name
   Future<Map<String, dynamic>> searchPeople(String query) async {
     try {
-      // Encodage de l'URL pour gérer les caractères spéciaux
+      // URL encoding to handle special characters
       final String encodedQuery = Uri.encodeComponent(query);
       final String url = '$baseUrl/people/?search=$encodedQuery';
       print('Searching for: $url');
 
-      // Ajouter un timeout à la requête
+      // Add timeout to the request
       final response =
           await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
         throw Exception(
@@ -69,12 +74,12 @@ class SwapiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
 
-        // Vérifier si les résultats existent et sont non vides
+        // Check if results exist and are not empty
         if (!data.containsKey('results') || data['results'] == null) {
           throw Exception('Invalid search response format: missing results');
         }
 
-        // Convertir les résultats en objets Person
+        // Convert results to Person objects
         final List<dynamic> results = data['results'];
         final List<Person> people =
             results.map((personData) => Person.fromJson(personData)).toList();
@@ -96,12 +101,12 @@ class SwapiService {
     }
   }
 
-  /// Récupère les détails d'un personnage spécifique
+  /// Fetch details of a specific character
   Future<Person> fetchPersonDetails(String url) async {
     try {
       print('Fetching details from: $url');
 
-      // Ajouter un timeout à la requête
+      // Add timeout to the request
       final response =
           await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
         throw Exception(
@@ -120,12 +125,12 @@ class SwapiService {
     }
   }
 
-  /// Récupère les détails d'un personnage spécifique par URL
+  /// Fetch details of a specific character by URL
   Future<Person?> fetchPersonByUrl(String url) async {
     try {
       print('Fetching person from URL: $url');
 
-      // Ajouter un timeout à la requête
+      // Add timeout to the request
       final response =
           await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
         throw Exception(
@@ -141,6 +146,121 @@ class SwapiService {
       }
     } catch (e) {
       print('Error fetching person by URL: $e');
+      return null;
+    }
+  }
+
+  /// Fetch details of a film by URL
+  Future<Film?> fetchFilmByUrl(String url) async {
+    try {
+      print('Fetching film from URL: $url');
+
+      final response =
+          await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
+        throw Exception('Request timed out. Please check your connection.');
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return Film.fromJson(data);
+      } else {
+        print('Failed to load film by URL: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching film by URL: $e');
+      return null;
+    }
+  }
+
+  /// Fetch details of a species by URL
+  Future<Species?> fetchSpeciesByUrl(String url) async {
+    try {
+      print('Fetching species from URL: $url');
+
+      final response =
+          await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
+        throw Exception('Request timed out. Please check your connection.');
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return Species.fromJson(data);
+      } else {
+        print('Failed to load species by URL: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching species by URL: $e');
+      return null;
+    }
+  }
+
+  /// Fetch details of a vehicle by URL
+  Future<Vehicle?> fetchVehicleByUrl(String url) async {
+    try {
+      print('Fetching vehicle from URL: $url');
+
+      final response =
+          await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
+        throw Exception('Request timed out. Please check your connection.');
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return Vehicle.fromJson(data);
+      } else {
+        print('Failed to load vehicle by URL: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching vehicle by URL: $e');
+      return null;
+    }
+  }
+
+  /// Fetch details of a starship by URL
+  Future<Starship?> fetchStarshipByUrl(String url) async {
+    try {
+      print('Fetching starship from URL: $url');
+
+      final response =
+          await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
+        throw Exception('Request timed out. Please check your connection.');
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return Starship.fromJson(data);
+      } else {
+        print('Failed to load starship by URL: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching starship by URL: $e');
+      return null;
+    }
+  }
+
+  /// Fetch details of a planet by URL
+  Future<Planet?> fetchPlanetByUrl(String url) async {
+    try {
+      print('Fetching planet from URL: $url');
+
+      final response =
+          await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
+        throw Exception('Request timed out. Please check your connection.');
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return Planet.fromJson(data);
+      } else {
+        print('Failed to load planet by URL: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching planet by URL: $e');
       return null;
     }
   }

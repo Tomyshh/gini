@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:gini/constants/text_styles.dart';
 import 'package:provider/provider.dart';
 import '../models/person.dart';
 import '../providers/people_provider.dart';
 import '../constants/theme.dart';
+import '../screens/person_detail_screen.dart';
 import 'dart:math' as math;
 
 class PersonCard extends StatelessWidget {
@@ -45,8 +48,8 @@ class PersonCard extends StatelessWidget {
               : Colors.black.withOpacity(0.15),
           borderRadius: BorderRadius.circular(16.0),
           child: Container(
-            // Hauteur fixe pour favoris, adaptative pour les autres, avec minimum garanti
-            height: isFavorite ? math.max(scaledHeight, 200) : scaledHeight,
+            // Fixed height for favorites, adaptive for others, with minimum guaranteed
+            height: isFavorite ? math.max(scaledHeight, 300) : scaledHeight,
             margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
@@ -63,13 +66,13 @@ class PersonCard extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: isDarkMode
                           ? [
-                              // Version sombre - élégante
+                              // Dark version - elegant
                               const Color(0xFF2D2101),
                               const Color(0xFF352701),
                               const Color(0xFF40300A),
                             ]
                           : [
-                              // Version claire - élégante
+                              // Light version - elegant
                               const Color(0xFFEBF5FE),
                               const Color(0xFFE3F2FD),
                               const Color(0xFFD6EBFC),
@@ -81,21 +84,21 @@ class PersonCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16.0),
               child: Stack(
                 children: [
-                  // Background pattern subtil pour les favoris
+                  // Subtle background pattern for favorites
                   if (isFavorite)
                     Positioned.fill(
                       child: CustomPaint(
                         painter: StarWarsPatternPainter(
                           color: primaryColor.withOpacity(0.06),
-                          density: 0.6, // Moins dense
+                          density: 0.6, // Less dense
                         ),
                       ),
                     ),
 
-                  // Structure principale
+                  // Main structure
                   Row(
                     children: [
-                      // Barre latérale intégrée avec l'indicateur de hauteur
+                      // Side bar integrated with height indicator
                       Container(
                         width: 6,
                         decoration: BoxDecoration(
@@ -107,7 +110,7 @@ class PersonCard extends StatelessWidget {
                               _getHeightColor(heightValue).withOpacity(0.7),
                             ],
                           ),
-                          // Pas de radius pour une intégration parfaite
+                          // No radius for perfect integration
                         ),
                       ),
 
@@ -117,7 +120,7 @@ class PersonCard extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Nom avec éventuelle icône/badge
+                              // Name with possible icon/badge
                               Row(
                                 children: [
                                   Expanded(
@@ -131,14 +134,14 @@ class PersonCard extends StatelessWidget {
                                                 ? Colors.white
                                                 : AppTheme.imperialBlue)
                                             : theme.colorScheme.onSurface,
-                                        fontSize: 18,
+                                        fontSize: 22,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
 
-                                  // Indicateur favori sur la même ligne que le titre
+                                  // Favorite indicator on the same line as the title
                                   if (isFavorite)
                                     Container(
                                       padding: const EdgeInsets.all(5.0),
@@ -159,7 +162,7 @@ class PersonCard extends StatelessWidget {
 
                               const SizedBox(height: 16),
 
-                              // Bloc d'informations principales en ligne
+                              // Main information block in line
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
@@ -199,7 +202,7 @@ class PersonCard extends StatelessWidget {
 
                               const SizedBox(height: 16),
 
-                              // Indicateur de force
+                              // Force indicator
                               if (heightValue > 0) ...[
                                 Row(
                                   children: [
@@ -234,9 +237,46 @@ class PersonCard extends StatelessWidget {
                                 ),
                               ],
 
-                              // Informations supplémentaires pour les favoris - uniquement si la hauteur le permet
+                              // Details button
+                              const Spacer(),
+                              Center(
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    // Navigation with Cupertino transition
+                                    Navigator.of(context).push(
+                                      CupertinoPageRoute(
+                                        builder: (context) =>
+                                            PersonDetailScreen(person: person),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    Icons.arrow_forward,
+                                    size: 16,
+                                    color: Colors.black,
+                                  ),
+                                  label: Text(
+                                    'Details',
+                                    style: AppTextStyles.button.copyWith(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primaryColor,
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                  ),
+                                ),
+                              ),
+
+                              // Additional information for favorites - only if height allows
                               if (isFavorite) ...[
-                                const Spacer(), // Pour pousser les infos vers le bas
+                                const SizedBox(height: 12),
                                 Container(
                                   margin: const EdgeInsets.only(top: 8),
                                   padding: const EdgeInsets.all(10),
@@ -278,7 +318,7 @@ class PersonCard extends StatelessWidget {
                     ],
                   ),
 
-                  // Bouton favori
+                  // Favorite button
                   if (!isFavorite)
                     Positioned(
                       top: 8,
@@ -386,12 +426,12 @@ class PersonCard extends StatelessWidget {
 
   String _formatAttribute(String value) {
     if (value == 'unknown' || value.isEmpty) return "N/a";
-    // Capitalisation de la première lettre
+    // Capitalize first letter
     return value[0].toUpperCase() + value.substring(1);
   }
 }
 
-// Force level indicator amélioré
+// Enhanced force level indicator
 class ForceIndicator extends StatelessWidget {
   final double value;
   final Color color;
@@ -445,7 +485,7 @@ class ForceIndicator extends StatelessWidget {
   }
 }
 
-// Custom painter for the Star Wars pattern background - simplifié et moins chargé
+// Custom painter for the Star Wars pattern background - simplified and less cluttered
 class StarWarsPatternPainter extends CustomPainter {
   final Color color;
   final double density;
@@ -461,7 +501,7 @@ class StarWarsPatternPainter extends CustomPainter {
     final random = math.Random(42); // Fixed seed for consistent pattern
     final dotCount = (40 * density).toInt();
 
-    // Small dots only - plus élégant
+    // Small dots only - more elegant
     for (int i = 0; i < dotCount; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
@@ -470,7 +510,7 @@ class StarWarsPatternPainter extends CustomPainter {
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
-    // Petites étoiles (plus petites et moins nombreuses)
+    // Small stars (smaller and fewer)
     paint.strokeWidth = 1.0;
     for (int i = 0; i < (10 * density).toInt(); i++) {
       final x = random.nextDouble() * size.width;
