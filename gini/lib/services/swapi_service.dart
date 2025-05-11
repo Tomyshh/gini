@@ -119,4 +119,29 @@ class SwapiService {
       throw Exception('Connection error: $e');
     }
   }
+
+  /// Récupère les détails d'un personnage spécifique par URL
+  Future<Person?> fetchPersonByUrl(String url) async {
+    try {
+      print('Fetching person from URL: $url');
+
+      // Ajouter un timeout à la requête
+      final response =
+          await http.get(Uri.parse(url)).timeout(_timeout, onTimeout: () {
+        throw Exception(
+            'Details request timed out. Please check your connection.');
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return Person.fromJson(data);
+      } else {
+        print('Failed to load person by URL: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching person by URL: $e');
+      return null;
+    }
+  }
 }

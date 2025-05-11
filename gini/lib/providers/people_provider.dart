@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/person.dart';
 import '../services/swapi_service.dart';
 
 class PeopleProvider with ChangeNotifier {
   final SwapiService _swapiService = SwapiService();
+  static const String _favoritePersonKey = 'favorite_person_url';
 
   List<Person> _people = [];
   bool _isLoading = false;
@@ -33,9 +35,47 @@ class PeopleProvider with ChangeNotifier {
   int get currentPage => _currentPage;
 
   // Initialiser le provider en chargeant la première page
-  void initialize() {
+  Future<void> initialize() async {
     if (_people.isEmpty && !_isLoading) {
+      await _loadFavoriteFromPrefs();
       fetchPeople();
+    }
+  }
+
+  // Charger le favori depuis SharedPreferences
+  Future<void> _loadFavoriteFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoriteUrl = prefs.getString(_favoritePersonKey);
+
+      if (favoriteUrl != null && favoriteUrl.isNotEmpty) {
+        print("Loading favorite from prefs: $favoriteUrl");
+        // On va chercher le détail du personnage via son URL
+        final person = await _swapiService.fetchPersonByUrl(favoriteUrl);
+        if (person != null) {
+          person.isFavorite = true;
+          _favoritePerson = person;
+          print("Favorite person loaded: ${person.name}");
+        }
+      }
+    } catch (e) {
+      print("Error loading favorite from prefs: $e");
+    }
+  }
+
+  // Sauvegarder le favori dans SharedPreferences
+  Future<void> _saveFavoriteToPrefs(Person? person) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (person != null) {
+        await prefs.setString(_favoritePersonKey, person.url);
+        print("Saved favorite to prefs: ${person.name} (${person.url})");
+      } else {
+        await prefs.remove(_favoritePersonKey);
+        print("Removed favorite from prefs");
+      }
+    } catch (e) {
+      print("Error saving favorite to prefs: $e");
     }
   }
 
@@ -189,8 +229,21 @@ class PeopleProvider with ChangeNotifier {
   }
 
   // Set a person as favorite
-  void setFavoritePerson(Person person) {
+  Future<void> setFavoritePerson(Person person) async {
     print("Setting ${person.name} as favorite");
+
+    // Si c'est déjà le favori, on l'enlève
+    if (_favoritePerson != null && _favoritePerson!.url == person.url) {
+      final index = _people.indexWhere((p) => p.url == _favoritePerson!.url);
+      if (index != -1) {
+        _people[index].isFavorite = false;
+        print("Removed favorite status from ${_people[index].name}");
+      }
+      _favoritePerson = null;
+      await _saveFavoriteToPrefs(null);
+      notifyListeners();
+      return;
+    }
 
     // Reset old favorite
     if (_favoritePerson != null) {
@@ -207,6 +260,7 @@ class PeopleProvider with ChangeNotifier {
       _people[index].isFavorite = true;
       _favoritePerson = _people[index];
       print("${person.name} is now favorite");
+      await _saveFavoriteToPrefs(_favoritePerson);
     }
 
     notifyListeners();

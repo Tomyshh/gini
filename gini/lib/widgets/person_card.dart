@@ -21,7 +21,8 @@ class PersonCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final heightValue = person.heightValue;
     final heightFactor = heightValue > 0 ? heightValue / 200 : 0.5;
-    final scaledHeight = (maxHeight * heightFactor).clamp(60.0, maxHeight);
+    // Hauteur minimale garantie et hauteur maximum limitée pour éviter l'overflow
+    final scaledHeight = (maxHeight * heightFactor).clamp(130.0, maxHeight);
     final isFavorite = person.isFavorite;
     final theme = Theme.of(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -35,293 +36,343 @@ class PersonCard extends StatelessWidget {
         Provider.of<PeopleProvider>(context, listen: false)
             .setFavoritePerson(person);
       },
-      child: Container(
-        height: scaledHeight,
-        margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
-        decoration: BoxDecoration(
-          color: isFavorite
-              // Réduit l'opacité pour le fond favori et utilise une couleur plus sombre
-              ? (isDarkMode ? const Color(0xFF5A4200) : const Color(0xFFE3F2FD))
-              : theme.colorScheme.surface,
+      child: Hero(
+        tag: 'person_${person.url}',
+        child: Material(
+          elevation: isFavorite ? 8 : 2,
+          shadowColor: isFavorite
+              ? primaryColor.withOpacity(0.5)
+              : Colors.black.withOpacity(0.15),
           borderRadius: BorderRadius.circular(16.0),
-          boxShadow: [
-            BoxShadow(
-              color:
-                  isFavorite ? primaryColor.withOpacity(0.6) : Colors.black12,
-              blurRadius: isFavorite ? 10.0 : 8.0,
-              offset: const Offset(0, 4),
-              spreadRadius: isFavorite ? 1.0 : 0.0,
+          child: Container(
+            // Hauteur fixe pour favoris, adaptative pour les autres, avec minimum garanti
+            height: isFavorite ? math.max(scaledHeight, 200) : scaledHeight,
+            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(16.0),
+              border: isFavorite
+                  ? Border.all(
+                      color: primaryColor.withOpacity(0.7),
+                      width: 1.5,
+                    )
+                  : null,
+              gradient: isFavorite
+                  ? LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDarkMode
+                          ? [
+                              // Version sombre - élégante
+                              const Color(0xFF2D2101),
+                              const Color(0xFF352701),
+                              const Color(0xFF40300A),
+                            ]
+                          : [
+                              // Version claire - élégante
+                              const Color(0xFFEBF5FE),
+                              const Color(0xFFE3F2FD),
+                              const Color(0xFFD6EBFC),
+                            ],
+                    )
+                  : null,
             ),
-          ],
-          border:
-              isFavorite ? Border.all(color: primaryColor, width: 2.0) : null,
-          // Utilise un gradient moins intense pour le favori
-          gradient: isFavorite
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: isDarkMode
-                      ? [
-                          // Version sombre - fond doré moins intense
-                          const Color(0xFF3C2E00),
-                          const Color(0xFF4E3A00),
-                          const Color(0xFF5A4200),
-                        ]
-                      : [
-                          // Version claire - fond bleu moins intense
-                          const Color(0xFFE3F2FD),
-                          const Color(0xFFBBDEFB),
-                          const Color(0xFFE3F2FD),
-                        ],
-                )
-              : null,
-        ),
-        child: Stack(
-          children: [
-            // Star Wars background pattern for favorite using generated pattern
-            if (isFavorite)
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16.0),
-                  child: CustomPaint(
-                    painter: StarWarsPatternPainter(
-                      color: primaryColor.withOpacity(0.07),
-                    ),
-                  ),
-                ),
-              ),
-
-            Row(
-              children: [
-                // Height visualization (vertical bar on the left)
-                Container(
-                  width: 6,
-                  decoration: BoxDecoration(
-                    color: _getHeightColor(heightValue),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      bottomLeft: Radius.circular(16),
-                    ),
-                    // Lightsaber glow effect for favorite
-                    boxShadow: isFavorite
-                        ? [
-                            BoxShadow(
-                              color:
-                                  _getHeightColor(heightValue).withOpacity(0.6),
-                              blurRadius: 8,
-                              spreadRadius: 1,
-                            ),
-                          ]
-                        : null,
-                  ),
-                ),
-
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row(
-                          children: [
-                            // Add imperial/rebel icon based on height
-                            if (isFavorite)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: Icon(
-                                  heightValue > 180 ? Icons.public : Icons.face,
-                                  color: primaryColor,
-                                  size: 20,
-                                ).animate().fadeIn().scale(),
-                              ),
-
-                            Expanded(
-                              child: Text(
-                                person.name,
-                                style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: isFavorite
-                                      ? (isDarkMode
-                                          ? Colors.white
-                                          : AppTheme
-                                              .imperialBlue) // Améliore le contraste
-                                      : theme.colorScheme.onSurface,
-                                  letterSpacing: isFavorite ? 0.5 : null,
-                                  fontSize: isFavorite ? 18 : 16,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-
-                            if (isFavorite)
-                              Container(
-                                padding: const EdgeInsets.all(4.0),
-                                margin: const EdgeInsets.only(
-                                    right: 30.0), // Espace pour le badge
-                                decoration: BoxDecoration(
-                                  color: primaryColor.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.star,
-                                  color: AppTheme.tatooineGold,
-                                  size: 24,
-                                )
-                                    .animate(
-                                      onPlay: (controller) =>
-                                          controller.repeat(),
-                                    )
-                                    .shimmer(
-                                      duration: 2.seconds,
-                                      color: Colors.white,
-                                    )
-                                    .animate(
-                                      onPlay: (controller) =>
-                                          controller.repeat(),
-                                    )
-                                    .scale(
-                                      begin: const Offset(1.0, 1.0),
-                                      end: const Offset(1.1, 1.1),
-                                      duration: 1.5.seconds,
-                                    ),
-                              ),
-                          ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: Stack(
+                children: [
+                  // Background pattern subtil pour les favoris
+                  if (isFavorite)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: StarWarsPatternPainter(
+                          color: primaryColor.withOpacity(0.06),
+                          density: 0.6, // Moins dense
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Height: ${person.height == "unknown" ? "Unknown" : "${person.height} cm"}',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isFavorite
-                                ? (isDarkMode
-                                    ? Colors.white70
-                                    : Colors.black87) // Améliore le contraste
-                                : theme.colorScheme.onSurfaceVariant,
-                            fontWeight: isFavorite ? FontWeight.w500 : null,
-                          ),
-                        ),
-                        if (isFavorite) ...[
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Gender: ${_formatAttribute(person.gender)}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: isDarkMode
-                                        ? Colors.white70
-                                        : Colors
-                                            .black87, // Améliore le contraste
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                'Born: ${_formatAttribute(person.birthYear)}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDarkMode
-                                      ? Colors.white70
-                                      : Colors.black87, // Améliore le contraste
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                      ),
+                    ),
+
+                  // Structure principale
+                  Row(
+                    children: [
+                      // Barre latérale intégrée avec l'indicateur de hauteur
+                      Container(
+                        width: 6,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              _getHeightColor(heightValue),
+                              _getHeightColor(heightValue).withOpacity(0.7),
                             ],
                           ),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (heightValue > 0)
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Force level: ',
-                                        style:
-                                            theme.textTheme.bodySmall?.copyWith(
-                                          color: isDarkMode
-                                              ? Colors.white70
-                                              : AppTheme.imperialBlue,
-                                          fontStyle: FontStyle.italic,
-                                        ),
+                          // Pas de radius pour une intégration parfaite
+                        ),
+                      ),
+
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Nom avec éventuelle icône/badge
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      person.name,
+                                      style:
+                                          theme.textTheme.titleLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: isFavorite
+                                            ? (isDarkMode
+                                                ? Colors.white
+                                                : AppTheme.imperialBlue)
+                                            : theme.colorScheme.onSurface,
+                                        fontSize: 18,
                                       ),
-                                      Expanded(
-                                        child: ForceIndicator(
-                                          value: (heightValue / 300)
-                                              .clamp(0.0, 1.0),
-                                          color: isDarkMode
-                                              ? AppTheme.tatooineGold
-                                              : AppTheme.imperialBlue,
-                                        ),
-                                      )
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+
+                                  // Indicateur favori sur la même ligne que le titre
+                                  if (isFavorite)
+                                    Container(
+                                      padding: const EdgeInsets.all(5.0),
+                                      decoration: BoxDecoration(
+                                        color: isDarkMode
+                                            ? Colors.white.withOpacity(0.15)
+                                            : primaryColor.withOpacity(0.15),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.star,
+                                        color: AppTheme.tatooineGold,
+                                        size: 18,
+                                      ),
+                                    ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Bloc d'informations principales en ligne
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  _buildInfoItem(
+                                      context,
+                                      Icons.height,
+                                      '${person.height == "unknown" ? "?" : "${person.height}"}',
+                                      'cm',
+                                      isDarkMode,
+                                      isFavorite),
+                                  const SizedBox(width: 16),
+                                  _buildInfoItem(
+                                      context,
+                                      person.gender
+                                              .toLowerCase()
+                                              .contains('male')
+                                          ? Icons.male
+                                          : person.gender
+                                                  .toLowerCase()
+                                                  .contains('female')
+                                              ? Icons.female
+                                              : Icons.question_mark,
+                                      _formatAttribute(person.gender),
+                                      '',
+                                      isDarkMode,
+                                      isFavorite),
+                                  const SizedBox(width: 16),
+                                  _buildInfoItem(
+                                      context,
+                                      Icons.cake_outlined,
+                                      _formatAttribute(person.birthYear),
+                                      '',
+                                      isDarkMode,
+                                      isFavorite),
+                                ],
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Indicateur de force
+                              if (heightValue > 0) ...[
+                                Row(
+                                  children: [
+                                    Text(
+                                      'Force:',
+                                      style:
+                                          theme.textTheme.bodySmall?.copyWith(
+                                        color: isFavorite
+                                            ? (isDarkMode
+                                                ? Colors.white70
+                                                : Colors.black87)
+                                            : theme
+                                                .colorScheme.onSurfaceVariant,
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: ForceIndicator(
+                                        value:
+                                            (heightValue / 300).clamp(0.0, 1.0),
+                                        color: isFavorite
+                                            ? (isDarkMode
+                                                ? AppTheme.tatooineGold
+                                                : AppTheme.imperialBlue)
+                                            : _getHeightColor(heightValue),
+                                        height: 8.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+
+                              // Informations supplémentaires pour les favoris - uniquement si la hauteur le permet
+                              if (isFavorite) ...[
+                                const Spacer(), // Pour pousser les infos vers le bas
+                                Container(
+                                  margin: const EdgeInsets.only(top: 8),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: isDarkMode
+                                        ? Colors.black.withOpacity(0.2)
+                                        : Colors.black.withOpacity(0.03),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _buildFavoriteDetail(
+                                          context,
+                                          'Eyes',
+                                          _formatAttribute(person.eyeColor),
+                                          isDarkMode),
+                                      Container(
+                                        height: 24,
+                                        width: 1,
+                                        color: isDarkMode
+                                            ? Colors.white.withOpacity(0.1)
+                                            : Colors.black.withOpacity(0.1),
+                                      ),
+                                      _buildFavoriteDetail(
+                                          context,
+                                          'Hair',
+                                          _formatAttribute(person.hairColor),
+                                          isDarkMode),
                                     ],
                                   ),
+                                ),
                               ],
-                            ),
-                          )
-                        ]
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // Favorite badge - repositionné et redessiné
-            if (isFavorite)
-              Positioned(
-                top: -2,
-                right: -2,
-                child: FavoriteCornerBadge(
-                  color: AppTheme.rebellionRed,
-                ),
-              ),
-
-            // Favorite button
-            Positioned(
-              bottom: 8,
-              right: 8,
-              child: isFavorite
-                  ? const SizedBox.shrink()
-                  : Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          // Add haptic feedback for better interaction
-                          HapticFeedback.lightImpact();
-                          Provider.of<PeopleProvider>(context, listen: false)
-                              .setFavoritePerson(person);
-                        },
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface.withOpacity(0.8),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
                             ],
                           ),
-                          child: Icon(
-                            Icons.favorite_border,
-                            color: AppTheme.rebellionRed.withOpacity(0.8),
-                            size: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Bouton favori
+                  if (!isFavorite)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            Provider.of<PeopleProvider>(context, listen: false)
+                                .setFavoritePerson(person);
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.favorite_border,
+                              color: AppTheme.rebellionRed.withOpacity(0.8),
+                              size: 20,
+                            ),
                           ),
                         ),
                       ),
                     ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
-    ).animate().fade(duration: 400.ms).scale(
-        begin: const Offset(0.95, 0.95),
-        duration: 400.ms,
-        curve: Curves.easeOutQuad);
+    ).animate().fade(duration: 400.ms).slideY(
+          begin: 0.05,
+          end: 0,
+          duration: 400.ms,
+          curve: Curves.easeOutQuad,
+        );
+  }
+
+  Widget _buildInfoItem(BuildContext context, IconData icon, String value,
+      String unit, bool isDarkMode, bool isFavorite) {
+    final textColor = isFavorite
+        ? (isDarkMode ? Colors.white : Colors.black87)
+        : Theme.of(context).colorScheme.onSurface;
+
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: textColor.withOpacity(0.7),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: textColor,
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+        if (unit.isNotEmpty)
+          Text(
+            ' $unit',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: textColor.withOpacity(0.7),
+                ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFavoriteDetail(
+      BuildContext context, String label, String value, bool isDarkMode) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: isDarkMode ? Colors.white60 : Colors.black54,
+                fontSize: 10,
+              ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDarkMode ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
+        ),
+      ],
+    );
   }
 
   Color _getHeightColor(int height) {
@@ -334,73 +385,39 @@ class PersonCard extends StatelessWidget {
   }
 
   String _formatAttribute(String value) {
-    if (value == 'unknown' || value.isEmpty) return 'Unknown';
-    return value;
+    if (value == 'unknown' || value.isEmpty) return "N/a";
+    // Capitalisation de la première lettre
+    return value[0].toUpperCase() + value.substring(1);
   }
 }
 
-// Nouveau badge de coin pour favori, plus élégant et mieux positionnné
-class FavoriteCornerBadge extends StatelessWidget {
-  final Color color;
-
-  const FavoriteCornerBadge({
-    super.key,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 70,
-      height: 70,
-      child: Stack(
-        children: [
-          CustomPaint(
-            size: const Size(70, 70),
-            painter: CornerBadgePainter(
-              color: color,
-              shadowColor: Colors.black.withOpacity(0.3),
-            ),
-          ),
-          const Positioned(
-            right: 8,
-            top: 8,
-            child: Icon(
-              Icons.favorite,
-              color: Colors.white,
-              size: 18,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Force level indicator
+// Force level indicator amélioré
 class ForceIndicator extends StatelessWidget {
   final double value;
   final Color color;
+  final double height;
 
   const ForceIndicator({
     super.key,
     required this.value,
     required this.color,
+    this.height = 10.0,
   });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       final width = constraints.maxWidth;
+      final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
       return Container(
         width: width,
-        height: 8,
+        height: height,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(4),
+          color: isDarkMode ? Colors.black26 : Colors.black.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(height / 2),
         ),
-        child: Row(
+        child: Stack(
           children: [
             Container(
               width: width * value,
@@ -411,21 +428,16 @@ class ForceIndicator extends StatelessWidget {
                     color,
                   ],
                 ),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(height / 2),
                 boxShadow: [
                   BoxShadow(
-                    color: color.withOpacity(0.5),
+                    color: color.withOpacity(0.3),
                     blurRadius: 4,
-                    spreadRadius: 0.2,
+                    spreadRadius: 0,
                   ),
                 ],
               ),
-            )
-                .animate(
-                  onPlay: (controller) => controller.repeat(),
-                )
-                .shimmer(
-                    duration: 2.seconds, color: Colors.white.withOpacity(0.7)),
+            ),
           ],
         ),
       );
@@ -433,11 +445,12 @@ class ForceIndicator extends StatelessWidget {
   }
 }
 
-// Custom painter for the Star Wars pattern background
+// Custom painter for the Star Wars pattern background - simplifié et moins chargé
 class StarWarsPatternPainter extends CustomPainter {
   final Color color;
+  final double density;
 
-  StarWarsPatternPainter({required this.color});
+  StarWarsPatternPainter({required this.color, this.density = 1.0});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -446,22 +459,23 @@ class StarWarsPatternPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final random = math.Random(42); // Fixed seed for consistent pattern
+    final dotCount = (40 * density).toInt();
 
-    // Small circles
-    for (int i = 0; i < 50; i++) {
+    // Small dots only - plus élégant
+    for (int i = 0; i < dotCount; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 3 + 1;
+      final radius = random.nextDouble() * 1.5 + 0.5;
 
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
 
-    // Stars (Crosses)
-    paint.strokeWidth = 1.5;
-    for (int i = 0; i < 20; i++) {
+    // Petites étoiles (plus petites et moins nombreuses)
+    paint.strokeWidth = 1.0;
+    for (int i = 0; i < (10 * density).toInt(); i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
-      final starSize = random.nextDouble() * 4 + 2;
+      final starSize = random.nextDouble() * 2 + 1;
 
       // Horizontal line
       canvas.drawLine(
@@ -477,72 +491,6 @@ class StarWarsPatternPainter extends CustomPainter {
         paint,
       );
     }
-
-    // Small dasked lines
-    paint.strokeWidth = 1.0;
-    for (int i = 0; i < 15; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final len = random.nextDouble() * 15 + 5;
-      final angle = random.nextDouble() * math.pi * 2;
-
-      final dx = math.cos(angle) * len;
-      final dy = math.sin(angle) * len;
-
-      canvas.drawLine(
-        Offset(x, y),
-        Offset(x + dx, y + dy),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// Painter plus élégant pour le badge de coin
-class CornerBadgePainter extends CustomPainter {
-  final Color color;
-  final Color shadowColor;
-
-  CornerBadgePainter({
-    required this.color,
-    required this.shadowColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-
-    // Corner badge shape
-    path.moveTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.close();
-
-    // Draw shadow
-    canvas.drawShadow(path, shadowColor, 4, true);
-
-    // Draw badge
-    canvas.drawPath(path, paint);
-
-    // Add decorative element
-    final decorPaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final decorPath = Path();
-    decorPath.moveTo(size.width - 40, 0);
-    decorPath.lineTo(size.width, 0);
-    decorPath.lineTo(size.width, 40);
-
-    canvas.drawPath(decorPath, decorPaint);
   }
 
   @override
